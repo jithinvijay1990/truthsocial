@@ -1,0 +1,2 @@
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/REPLACE/ME
+POLL_TOKEN=some-random-string
