@@ -12,7 +12,7 @@
     {
       "binding": "DB",
       "database_name": "truthsocial-db",
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+      "database_id": "9ed14dfd-4ec1-4815-9bb3-82bb5d538842",
       "migrations_dir": "./migrations"
     }
   ],
