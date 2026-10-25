@@ -1,7 +1,7 @@
 {
   "name": "truthsocial",
   "version": "1.0.0",
-  "description": "Polls Trump's Truth Social posts via RSS and alerts Slack on market-relevant keywords (tariffs, China, the Fed, etc).",
+  "description": "Polls Trump's Truth Social posts via RSS and alerts Telegram on market-relevant keywords (tariffs, China, the Fed, etc).",
   "private": true,
   "type": "module",
   "scripts": {

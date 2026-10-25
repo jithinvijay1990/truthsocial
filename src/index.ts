@@ -1,16 +1,17 @@
 /**
  * Truth Social watcher — polls RSS mirrors of Trump's Truth Social posts on a
- * Cron Trigger, stores new posts in D1, and alerts Slack when a post matches
- * market-relevant keywords (tariffs, China, the Fed, etc).
+ * Cron Trigger, stores new posts in D1, and alerts Telegram when a post
+ * matches market-relevant keywords (tariffs, China, the Fed, etc).
  */
 import { parseRssFeed, type FeedItem } from "./feed";
 import { matchKeywords, parseKeywordList } from "./keywords";
-import { sendSlackAlert } from "./slack";
+import { sendTelegramAlert } from "./telegram";
 
 export interface Env {
   DB: D1Database;
   ASSETS: Fetcher;
-  SLACK_WEBHOOK_URL?: string;
+  TELEGRAM_BOT_TOKEN?: string;
+  TELEGRAM_CHAT_ID?: string;
   FEED_URLS?: string;
   MARKET_KEYWORDS?: string;
   ALERT_ALL_POSTS?: string;
@@ -44,7 +45,7 @@ async function fetchFeedItems(url: string): Promise<FeedItem[]> {
   return parseRssFeed(await res.text());
 }
 
-/** Polls all configured feeds, stores new posts, and alerts Slack on matches. */
+/** Polls all configured feeds, stores new posts, and alerts Telegram on matches. */
 export async function pollFeeds(env: Env): Promise<{ checked: number; inserted: number; alerted: number }> {
   const keywords = parseKeywordList(env.MARKET_KEYWORDS);
   const alertAll = env.ALERT_ALL_POSTS === "true";
@@ -87,15 +88,15 @@ export async function pollFeeds(env: Env): Promise<{ checked: number; inserted: 
       if (result.meta.changes === 0) continue; // already seen
       inserted++;
 
-      if (env.SLACK_WEBHOOK_URL && (isRelevant || alertAll)) {
+      if (env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_CHAT_ID && (isRelevant || alertAll)) {
         try {
-          const ok = await sendSlackAlert(env.SLACK_WEBHOOK_URL, item, matched);
+          const ok = await sendTelegramAlert(env.TELEGRAM_BOT_TOKEN, env.TELEGRAM_CHAT_ID, item, matched);
           if (ok) {
             alerted++;
-            await env.DB.prepare(`UPDATE posts SET slack_alerted = 1 WHERE guid = ?`).bind(item.guid).run();
+            await env.DB.prepare(`UPDATE posts SET alerted = 1 WHERE guid = ?`).bind(item.guid).run();
           }
         } catch (err) {
-          console.error(`[truthsocial] slack alert failed for ${item.guid}:`, err);
+          console.error(`[truthsocial] telegram alert failed for ${item.guid}:`, err);
         }
       }
     }

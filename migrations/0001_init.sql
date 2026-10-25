@@ -8,7 +8,7 @@ CREATE TABLE posts (
   fetched_at TEXT NOT NULL,
   is_market_relevant INTEGER NOT NULL DEFAULT 0,
   matched_keywords TEXT,
-  slack_alerted INTEGER NOT NULL DEFAULT 0
+  alerted INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE INDEX idx_posts_published_at ON posts (published_at DESC);
